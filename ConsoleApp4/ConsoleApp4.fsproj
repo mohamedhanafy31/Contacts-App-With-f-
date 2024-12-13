@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="DataTypes.fs" />
+		<Compile Include="Validation.fs" />
+		<Compile Include="StateService.fs" />
+		<Compile Include="SearchService.fs" />
+		<Compile Include="ColorUtilities.fs" />
+		<Compile Include="ContactService.fs" />
+		<Compile Include="ContactRepository.fs" />
+		<Compile Include="FileManage.fs" />
+		<Compile Include="ContactManager.fs" />
+		<Compile Include="Program.fs" />
+
+		<!-- Compile order matters in F# -->
+
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Text.Json" Version="7.0.3" />
+	</ItemGroup>
+
+</Project>
