@@ -1,3 +1,17 @@
-﻿module ColorUtilities
+﻿namespace ContactManagement
 
-// ---- That module will contain the operations for transformming the contatct color value between the operations and JSON file -----
+open System.Drawing
+open System
+module ColorUtilities =
+    let colorToHex (color: Color) =
+        System.Drawing.ColorTranslator.ToHtml(color)
+
+    let hexToColor (hex: string) =
+        try
+            System.Drawing.ColorTranslator.FromHtml(hex)
+        with
+        | :? ArgumentException -> failwith "Invalid color hex string"
+
+    let getContrastColor (bgColor: Color) =
+        let luminance = Validation.calculateLuminance bgColor
+        if luminance > 0.5 then Color.Black else Color.White
