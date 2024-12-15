@@ -104,6 +104,25 @@ module ContactManager =
                     Width = 200
                 )
             
+            saveButton.Click.Add (fun _ ->
+                let newContact = {
+                    Name = nameTextBox.Text
+                    PhoneNumber = phoneTextBox.Text
+                    Email = emailTextBox.Text
+                    Color = ColorUtilities.colorToHex(selectedColor)
+                }
+                
+                match StateService.updateContact contact.Name newContact (!stateRef) with
+                | Ok newState ->
+                    stateRef := newState
+                    FileManager.saveContacts newState.Contacts
+                    refreshPanel()
+                    editForm.Close()
+                    cardForm.Close()
+                | Error msg ->
+                    MessageBox.Show(msg) |> ignore
+            )
+            
             // Add controls to edit form
             editForm.Controls.AddRange([|
                 nameLabel :> Control; 
@@ -140,7 +159,10 @@ module ContactManager =
             
             if result = DialogResult.Yes then
                 let updatedState = StateService.deleteContact contact.Name (!stateRef)
-                // Not implemented yet
+                stateRef := updatedState
+                FileManager.saveContacts updatedState.Contacts
+                refreshPanel()
+                cardForm.Close()
         )
         
         [editButton; deleteButton] 
@@ -228,8 +250,17 @@ module ContactManager =
             contactPanel.Controls.Clear()
             
             let displayContacts = 
-                state.Value.Contacts 
-                |> Map.toList
+                match searchQuery with
+                | Some query -> 
+                    match SearchService.searchContacts query state.Value.Contacts with
+                    | Exact contact -> [contact.Name, contact]
+                    | Partial contacts -> 
+                        contacts 
+                        |> List.map (fun contact -> contact.Name, contact)
+                    | NoMatch -> []
+                | None -> 
+                    state.Value.Contacts 
+                    |> Map.toList
             
             displayContacts 
             |> List.iter (fun (_, contact) ->
@@ -254,7 +285,8 @@ module ContactManager =
         
         // Search button click
         searchButton.Click.Add (fun _ ->
-            // Not implemented yet
+            let query = searchTextBox.Text
+            refreshContactPanel (if String.IsNullOrWhiteSpace(query) then None else Some query)
         )
         
         // Add button click
@@ -305,8 +337,26 @@ module ContactManager =
                     | _ -> None)
 
             saveButton.Click.Add (fun _ ->
-                // Not implemented yet
+                let newContact = {
+                    Name = (getTextBox nameControls).Text
+                    PhoneNumber = (getTextBox phoneControls).Text
+                    Email = (getTextBox emailControls).Text
+                    Color = ColorUtilities.colorToHex(selectedColor)
+                }
+
+                match StateService.addContact newContact !state with
+                | Ok newState ->
+                    state := newState
+                    FileManager.saveContacts newState.Contacts
+                    refreshContactPanel None
+                    popupForm.Close()
+                | Error msg ->
+                    MessageBox.Show(msg) |> ignore
             )
+
+            // Add controls to form
+            (nameControls @ phoneControls @ emailControls @ [colorPicker; saveButton])
+            |> List.iter popupForm.Controls.Add
 
             popupForm.ShowDialog() |> ignore
         )
@@ -317,5 +367,5 @@ module ContactManager =
         // Add components to the form
         form.Controls.Add(contactPanel)
         form.Controls.Add(layout)
-        
-        form
+        
+        form
