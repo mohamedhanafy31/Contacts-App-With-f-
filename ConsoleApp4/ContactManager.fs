@@ -2,9 +2,11 @@ namespace ContactManagement
 
 // Import necessary modules and classes
 open System
+open System.Text.RegularExpressions
 open System.Windows.Forms
 open System.Drawing
 open System.IO
+open System.Text.Json
 
 // Existing code for Domain Model, Validation, FileManager, etc.
 
@@ -145,3 +147,175 @@ module ContactManager =
         |> List.iter cardForm.Controls.Add
         
         cardForm.ShowDialog() |> ignore
+
+    // Main UI form creation and layout
+    let createMainForm () =
+        let form = 
+            new Form(
+                Text = "Functional Contact Management", 
+                Width = 800, 
+                Height = 600
+            )
+        
+        // Add contact button and search panel
+        let layout = 
+            new TableLayoutPanel(
+                Dock = DockStyle.Top, 
+                RowCount = 2, 
+                ColumnCount = 3
+            )
+        
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20.0f))
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40.0f))
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40.0f))
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 50.0f))
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 50.0f))
+        
+        let addButton = 
+            new Button(
+                Text = "+", 
+                Width = 50, 
+                Height = 10, 
+                Dock = DockStyle.Right, 
+                Font = new Font(FontFamily.GenericSansSerif, 16.0f, FontStyle.Bold),
+                BackColor = Color.LightBlue
+            )
+        
+        let searchTextBox = 
+            new TextBox(
+                Width = 200, 
+                Anchor = AnchorStyles.None
+            )
+        
+        let searchButton = 
+            new Button(
+                Text = "Search", 
+                Width = 80
+            )
+        
+        let searchPanel = 
+            new FlowLayoutPanel(
+                Dock = DockStyle.Fill, 
+                AutoSize = true, 
+                FlowDirection = FlowDirection.LeftToRight, 
+                Margin = Padding(0, 20, 0, 0)
+            )
+        
+        searchPanel.Controls.Add(searchButton)
+        searchPanel.Controls.Add(searchTextBox)
+        
+        layout.Controls.Add(new Label(), 0, 0)
+        layout.Controls.Add(searchPanel, 1, 0)
+        layout.Controls.Add(addButton, 2, 0)
+        
+        let contactPanel = 
+            new FlowLayoutPanel(
+                Dock = DockStyle.Fill, 
+                AutoScroll = true, 
+                Padding = Padding(10)
+            )
+        
+        // State initialization
+        let initialState = {
+            Contacts = FileManager.loadContacts()
+            SearchQuery = None
+        }
+        
+        let state = ref initialState
+        
+        // Refresh contact panel based on search query
+        let rec refreshContactPanel (searchQuery: string option) =
+            contactPanel.Controls.Clear()
+            
+            let displayContacts = 
+                state.Value.Contacts 
+                |> Map.toList
+            
+            displayContacts 
+            |> List.iter (fun (_, contact) ->
+                let textColor = 
+                    Validation.getTextColor (ColorUtilities.hexToColor(contact.Color))
+                
+                let button = 
+                    new Button(
+                        Text = contact.Name, 
+                        Width = 200, 
+                        Height = 30, 
+                        BackColor = ColorUtilities.hexToColor(contact.Color), 
+                        ForeColor = textColor
+                    )
+                
+                button.Click.Add(fun _ -> 
+                    showContactCard state contact (fun () -> refreshContactPanel None)
+                )
+                
+                contactPanel.Controls.Add(button)
+            )
+        
+        // Search button click
+        searchButton.Click.Add (fun _ ->
+            // Not implemented yet
+        )
+        
+        // Add button click
+        addButton.Click.Add (fun _ ->
+            let popupForm = 
+                new Form(
+                    Text = "Add Contact", 
+                    Width = 400, 
+                    Height = 350, 
+                    StartPosition = FormStartPosition.CenterParent
+                )
+
+            let nameControls = createLabeledTextBox "Name" 10 |> fun (l, t) -> [l; t]
+            let phoneControls = createLabeledTextBox "Phone (Digits Only)" 70 |> fun (l, t) -> [l; t]
+            let emailControls = createLabeledTextBox "Email" 130 |> fun (l, t) -> [l; t]
+
+
+            let colorPicker = 
+                new Button(
+                    Text = "Choose Color", 
+                    Top = 190, 
+                    Left = 10, 
+                    Width = 200
+                )
+
+            let mutable selectedColor = Color.LightGray
+
+            colorPicker.Click.Add (fun _ ->
+                let colorDialog = new ColorDialog()
+                if colorDialog.ShowDialog() = DialogResult.OK then
+                    selectedColor <- colorDialog.Color
+                    colorPicker.BackColor <- selectedColor
+            )
+
+            let saveButton = 
+                new Button(
+                    Text = "Save", 
+                    Top = 230, 
+                    Left = 10, 
+                    Width = 200
+                )
+
+            // Get textboxes from controls
+            let getTextBox (controls: Control list) = 
+                controls 
+                |> List.pick (function 
+                    | :? TextBox as tb -> Some tb 
+                    | _ -> None)
+
+            saveButton.Click.Add (fun _ ->
+                // Not implemented yet
+            )
+
+            popupForm.ShowDialog() |> ignore
+        )
+
+        // Initial panel refresh
+        refreshContactPanel None
+        
+        // Add components to the form
+        form.Controls.Add(contactPanel)
+        form.Controls.Add(layout)
+        
+        form
