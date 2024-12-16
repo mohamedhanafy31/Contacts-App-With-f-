@@ -1,6 +1,7 @@
 namespace ContactManagement
 
 open System
+open DataTypes
 
 module SearchService =
     let searchContacts (query: string) (contacts: Map<string, Contact>) : ContactSearchResult =
