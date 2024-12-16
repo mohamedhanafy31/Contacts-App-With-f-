@@ -1,5 +1,3 @@
-﻿module Validation
-
 namespace ContactManagement
 
 open System
