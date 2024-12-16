@@ -3,6 +3,7 @@ namespace ContactManagement
 open System
 open System.Text.RegularExpressions
 open System.Drawing
+open DataTypes
 
 module Validation =
 
