@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Newtonsoft.Json
-
+open DataTypes
 
 // FileManager.fs
 module FileManager =
