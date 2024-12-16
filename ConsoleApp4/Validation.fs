@@ -3,7 +3,6 @@ namespace ContactManagement
 open System
 open System.Text.RegularExpressions
 open System.Drawing
-open DataTypes
 
 module Validation =
 
@@ -22,9 +21,3 @@ module Validation =
         isValidPhoneNumber contact.PhoneNumber &&
         isValidEmail contact.Email
 
-    // Shared luminance calculation
-    let calculateLuminance (color: Color) =
-        (0.299 * float color.R + 0.587 * float color.G + 0.114 * float color.B) / 255.0
-
-    let getTextColor (bgColor: Color) =
-        if calculateLuminance bgColor > 0.5 then Color.Black else Color.White
