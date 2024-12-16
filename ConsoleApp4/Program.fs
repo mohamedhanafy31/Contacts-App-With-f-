@@ -15,4 +15,5 @@ module Program =
     let main _ =
         Application.EnableVisualStyles()
         Application.SetCompatibleTextRenderingDefault(false)
+        Application.Run(ContactManager.createMainForm())
         0
