@@ -2,6 +2,8 @@
 
 open System.Drawing
 open System
+open DataTypes
+
 module ColorUtilities =
     let colorToHex (color: Color) =
         System.Drawing.ColorTranslator.ToHtml(color)
