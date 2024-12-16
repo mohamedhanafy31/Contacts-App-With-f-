@@ -1,5 +1,7 @@
 namespace ContactManagement
 
+open DataTypes
+
 module StateService =
     let renameContact (oldName: string) (newName: string) (updatedContact: Contact) (state: AppState) : Result<AppState, string> =
         if not (state.Contacts.ContainsKey oldName) then
